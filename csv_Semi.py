@@ -26,7 +26,7 @@ def read_csv_with_dynamic_header_for_Semi(uploaded_file):
         df_temp = pd.read_csv(file_content, header=None, nrows=100)
         
         # 'Fw' 관련 필드명으로 키워드 수정
-        keywords = ['SNumber', 'SemiStamp', 'SemiAssyMaxSolarVolt', 'SemiAssyPass']
+        keywords = ['SNumber', 'SemiAssyStartTime', 'SemiAssyMaxSolarVolt', 'SemiAssyPass']
         
         header_row = None
         for i, row in df_temp.iterrows():
