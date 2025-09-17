@@ -1,15 +1,10 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
 from datetime import datetime
-import warnings
 
-# 같은 디렉터리에 있는 csv2.py 파일에서 함수들을 가져옵니다.
-from csv2 import read_csv_with_dynamic_header, analyze_csv_data
+# csv2.py에서 함수들을 가져옵니다.
+from csv2 import read_csv_with_dynamic_header, analyze_data
 
-warnings.filterwarnings('ignore')
-
-# --- 3. Streamlit 웹 인터페이스 구성 ---
 def main():
     st.set_page_config(layout="wide")
     st.title("리모컨 생산 데이터 분석 리포트")
@@ -33,7 +28,7 @@ def main():
                 
                 with st.spinner("데이터 분석 중... 잠시만 기다려주세요."):
                     # csv2.py의 함수를 사용하여 데이터 분석
-                    summary_data, all_dates = analyze_csv_data(df)
+                    summary_data, all_dates = analyze_data(df)
                     
                     kor_date_cols = [f"{d.strftime('%y%m%d')}" for d in all_dates]
                     
