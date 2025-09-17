@@ -1,3 +1,5 @@
+# streamlit_app.py 파일 (수정)
+
 import streamlit as st
 import pandas as pd
 from datetime import datetime
@@ -10,13 +12,44 @@ from csv_RfTx import read_csv_with_dynamic_header_for_RfTx, analyze_RfTx_data
 from csv_Semi import read_csv_with_dynamic_header_for_Semi, analyze_Semi_data
 from csv_Batadc import read_csv_with_dynamic_header_for_Batadc, analyze_Batadc_data
 
+# to_markdown() 대신 사용할 수동 마크다운 변환 함수
+def df_to_markdown_manual(df, index=False):
+    """
+    tabulate 없이 DataFrame을 마크다운 테이블 문자열로 변환합니다.
+    """
+    if df.empty:
+        return "데이터가 없습니다."
+
+    # 헤더 생성
+    if index:
+        cols = [''] + list(df.columns)
+    else:
+        cols = list(df.columns)
+    
+    header = "| " + " | ".join(cols) + " |"
+    
+    # 구분선 생성 (왼쪽 정렬)
+    separator = "|-" + "|-".join(['---'] * len(cols)) + "|"
+    
+    # 데이터 행 생성
+    rows = []
+    for _, row in df.iterrows():
+        if index:
+            row_data = [str(val) for val in [row.name] + list(row.values)]
+        else:
+            row_data = [str(val) for val in list(row.values)]
+        rows.append("| " + " | ".join(row_data) + " |")
+
+    return "\n".join([header, separator] + rows)
+
+
 def display_analysis_result(analysis_key, file_name):
     """ session_state에 저장된 분석 결과를 Streamlit에 표시하는 함수"""
     if st.session_state.analysis_results[analysis_key] is None:
         st.error("데이터 로드에 실패했습니다. 파일 형식을 확인해주세요.")
         return
 
-    df_result = st.session_state.analysis_results[analysis_key]
+    # df_result = st.session_state.analysis_results[analysis_key]
     summary_data, all_dates = st.session_state.analysis_data[analysis_key]
     
     st.markdown(f"### '{file_name}' 분석 리포트")
@@ -49,26 +82,16 @@ def display_analysis_result(analysis_key, file_name):
                 report_data[date_str] = ['N/A'] * 5
         
         report_df = pd.DataFrame(report_data)
-        st.table(report_df)
+        
+        # 수동으로 만든 함수를 사용해 마크다운 테이블 생성 및 출력
+        markdown_table = df_to_markdown_manual(report_df)
+        st.markdown(markdown_table) # st.table 대신 st.markdown 사용
         all_reports_text += f"--- 구분({jig}) ---\n"
-        all_reports_text += report_df.to_markdown(index=False) + "\n\n"
-
-        # 가성불량 시리얼 번호 목록
-        for date_iso, date_str in zip([d.strftime('%Y-%m-%d') for d in all_dates], kor_date_cols):
-            data_point = summary_data[jig].get(date_iso)
-            if data_point and data_point['false_defect_sns']:
-                st.write(f"**({date_str}) 가성불량 시리얼 번호 목록 ({jig})**")
-                all_reports_text += f"({date_str}) 가성불량 시리얼 번호 목록 ({jig})\n"
-                for sn in data_point['false_defect_sns']:
-                    st.code(f"      {sn}")
-                    all_reports_text += f"      {sn}\n"
-                st.markdown("---")
-                all_reports_text += "\n"
+        all_reports_text += markdown_table + "\n\n"
 
     st.success("분석이 완료되었습니다!")
 
     # 분석 결과를 CSV 파일로 다운로드하는 버튼 (st.download_button)
-    # 이 버튼은 클릭해도 앱이 재실행되지 않아 결과가 유지됩니다.
     st.download_button(
         label="분석 결과 다운로드",
         data=all_reports_text.encode('utf-8'),
@@ -136,7 +159,6 @@ def main():
                 else:
                     st.error("PCB 데이터 파일을 읽을 수 없습니다.")
 
-            # 저장된 결과가 있으면 표시
             if st.session_state.analysis_results['pcb'] is not None:
                 display_analysis_result('pcb', st.session_state.uploaded_files['pcb'].name)
 
