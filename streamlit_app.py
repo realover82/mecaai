@@ -58,12 +58,24 @@ def display_analysis_result(df, file_name, analysis_function, date_col_name):
         st.success("분석이 완료되었습니다!")
 
 @st.cache_data
-def read_a_data(uploaded_file):
+def read_pcb_data(uploaded_file):
     return read_csv_with_dynamic_header(uploaded_file)
 
 @st.cache_data
-def read_b_data(uploaded_file):
-    return read_csv_with_dynamic_header_for_fw(uploaded_file)
+def read_fw_data(uploaded_file):
+    return read_csv_with_dynamic_header_for_Fw(uploaded_file)
+
+@st.cache_data
+def read_rftx_data(uploaded_file):
+    return read_csv_with_dynamic_header_for_RfTx(uploaded_file)
+
+@st.cache_data
+def read_semi_data(uploaded_file):
+    return read_csv_with_dynamic_header_for_Semi(uploaded_file)
+    
+@st.cache_data
+def read_batadc_data(uploaded_file):
+    return read_csv_with_dynamic_header_for_Batadc(uploaded_file)
 
 def main():
     st.set_page_config(layout="wide")
@@ -73,49 +85,49 @@ def main():
     tab1, tab2, tab3, tab4, tab5 = st.tabs(["파일 PCB 분석", "파일 fw 분석", "파일 rftx 분석", "파일 semi 분석", "파일 func 분석"])
 
     with tab1:
-        st.header("파일 PCB (csv2.py 실행)")
-        uploaded_file_a = st.file_uploader("파일 A를 선택하세요", type=["csv"], key="file_a_uploader")
-        if uploaded_file_a:
-            df_a = read_a_data(uploaded_file_a)
-            st.dataframe(df_a.head())
-            if st.button("파일 A 분석 실행", key="analyze_a_button"):
-                display_analysis_result(df_a, uploaded_file_a.name, analyze_data, 'PcbStartTime')
+        st.header("파일 PCB (Pcb_Process)")
+        uploaded_file = st.file_uploader("파일 PCB를 선택하세요", type=["csv"], key="uploader_pcb")
+        if uploaded_file:
+            df = read_pcb_data(uploaded_file)
+            st.dataframe(df.head())
+            if st.button("파일 PCB 분석 실행", key="analyze_pcb"):
+                display_analysis_result(df, uploaded_file.name, analyze_data, 'PcbStartTime')
 
     with tab2:
-        st.header("파일 fw (csv_b.py 실행)")
-        uploaded_file_b = st.file_uploader("파일 B를 선택하세요", type=["csv"], key="file_b_uploader")
-        if uploaded_file_b:
-            df_b = read_b_data(uploaded_file_b)
-            st.dataframe(df_b.head())
-            if st.button("파일 B 분석 실행", key="analyze_b_button"):
-                display_analysis_result(df_b, uploaded_file_b.name, analyze_b_data, 'FwStamp')
+        st.header("파일 Fw (Fw_Process)")
+        uploaded_file = st.file_uploader("파일 Fw를 선택하세요", type=["csv"], key="uploader_fw")
+        if uploaded_file:
+            df = read_fw_data(uploaded_file)
+            st.dataframe(df.head())
+            if st.button("파일 Fw 분석 실행", key="analyze_fw"):
+                display_analysis_result(df, uploaded_file.name, analyze_Fw_data, 'FwStamp')
 
     with tab3:
-        st.header("파일 rftx (csv_rftx.py 실행)")
-        uploaded_file_b = st.file_uploader("파일 B를 선택하세요", type=["csv"], key="file_b_uploader")
-        if uploaded_file_b:
-            df_b = read_b_data(uploaded_file_b)
-            st.dataframe(df_b.head())
-            if st.button("파일 B 분석 실행", key="analyze_b_button"):
-                display_analysis_result(df_b, uploaded_file_b.name, analyze_b_data, 'FwStamp')
+        st.header("파일 RfTx (RfTx_Process)")
+        uploaded_file = st.file_uploader("파일 RfTx를 선택하세요", type=["csv"], key="uploader_rftx")
+        if uploaded_file:
+            df = read_rftx_data(uploaded_file)
+            st.dataframe(df.head())
+            if st.button("파일 RfTx 분석 실행", key="analyze_rftx"):
+                display_analysis_result(df, uploaded_file.name, analyze_RfTx_data, 'RfTxStamp')
 
     with tab4:
-        st.header("파일 semi (csv_semi.py 실행)")
-        uploaded_file_b = st.file_uploader("파일 B를 선택하세요", type=["csv"], key="file_b_uploader")
-        if uploaded_file_b:
-            df_b = read_b_data(uploaded_file_b)
-            st.dataframe(df_b.head())
-            if st.button("파일 B 분석 실행", key="analyze_b_button"):
-                display_analysis_result(df_b, uploaded_file_b.name, analyze_b_data, 'FwStamp')
+        st.header("파일 Semi (SemiAssy_Process)")
+        uploaded_file = st.file_uploader("파일 Semi를 선택하세요", type=["csv"], key="uploader_semi")
+        if uploaded_file:
+            df = read_semi_data(uploaded_file)
+            st.dataframe(df.head())
+            if st.button("파일 Semi 분석 실행", key="analyze_semi"):
+                display_analysis_result(df, uploaded_file.name, analyze_Semi_data, 'SemiAssyStartTime')
 
     with tab5:
-        st.header("파일 func (csv_func.py 실행)")
-        uploaded_file_b = st.file_uploader("파일 B를 선택하세요", type=["csv"], key="file_b_uploader")
-        if uploaded_file_b:
-            df_b = read_b_data(uploaded_file_b)
-            st.dataframe(df_b.head())
-            if st.button("파일 B 분석 실행", key="analyze_b_button"):
-                display_analysis_result(df_b, uploaded_file_b.name, analyze_b_data, 'FwStamp')
+        st.header("파일 Func (Func_Process)")
+        uploaded_file = st.file_uploader("파일 Func를 선택하세요", type=["csv"], key="uploader_func")
+        if uploaded_file:
+            df = read_batadc_data(uploaded_file)
+            st.dataframe(df.head())
+            if st.button("파일 Func 분석 실행", key="analyze_func"):
+                display_analysis_result(df, uploaded_file.name, analyze_Batadc_data, 'BatadcStamp')
 
 if __name__ == "__main__":
     main()
