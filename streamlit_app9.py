@@ -69,7 +69,7 @@ def display_analysis_result(analysis_key, file_name):
     # 분석 결과를 CSV 파일로 다운로드하는 버튼 (st.download_button)
     st.download_button(
         label="분석 결과 다운로드",
-        data=all_reports_text.encode('utf-8'),
+        data=all_reports_text.encode('utf-8-sig'),
         file_name=f"{file_name}_analysis_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
         mime="text/csv",
     )
