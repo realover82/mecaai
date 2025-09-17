@@ -6,19 +6,13 @@ import warnings
 
 warnings.filterwarnings('ignore')
 
-# '="...' 형식의 문자열을 정리하는 함수
 def clean_string_format(value):
     if isinstance(value, str) and value.startswith('="') and value.endswith('"'):
         return value[2:-1]
     return value
 
-@st.cache_data
 def read_csv_with_dynamic_header(uploaded_file):
-    """
-    업로드된 CSV 파일에서 컬럼명이 있는 행을 동적으로 찾아 DataFrame으로 로드하는 함수.
-    """
     try:
-        # 파일을 BytesIO 객체로 변환
         file_content = io.BytesIO(uploaded_file.getvalue())
         df_temp = pd.read_csv(file_content, header=None, nrows=100)
         
@@ -39,15 +33,9 @@ def read_csv_with_dynamic_header(uploaded_file):
         else:
             return None
     except Exception as e:
-        # Streamlit 앱에서 오류를 처리하도록 None 반환
         return None
 
-# --- 데이터 분석 및 리포트 생성 로직 함수 ---
 def analyze_data(df):
-    """
-    DataFrame을 분석하고 리포트 데이터를 생성하는 함수.
-    """
-    # 데이터 전처리
     for col in df.columns:
         df[col] = df[col].apply(clean_string_format)
 
@@ -56,7 +44,6 @@ def analyze_data(df):
 
     summary_data = {}
     
-    # 'PcbMaxIrPwr'를 기준으로 그룹화
     for jig, group in df.groupby('PcbMaxIrPwr'):
         if group['PcbStartTime'].dt.date.dropna().empty:
             continue
@@ -67,23 +54,18 @@ def analyze_data(df):
             
             date_iso = pd.to_datetime(d).strftime("%Y-%m-%d")
 
-            # VBA 논리 반영: 'O'가 있는 SN 목록 생성
             pass_sns_series = day_group.groupby('SNumber')['PassStatusNorm'].apply(lambda x: 'O' in x.tolist())
             pass_sns = pass_sns_series[pass_sns_series].index.tolist()
 
-            # 합격(O) 수
             pass_count = (day_group['PassStatusNorm'] == 'O').sum()
 
-            # 가성불량 (X이지만 'O' 기록이 있는 SN) 수 및 해당 SN 목록
             false_defect_df = day_group[(day_group['PassStatusNorm'] == 'X') & (day_group['SNumber'].isin(pass_sns))]
             false_defect_count = false_defect_df.shape[0]
             false_defect_sns = false_defect_df['SNumber'].unique().tolist()
 
-            # 진성불량 (오직 'X' 기록만 있는 SN) 수
             true_defect_df = day_group[(day_group['PassStatusNorm'] == 'X') & (~day_group['SNumber'].isin(pass_sns))]
             true_defect_count = true_defect_df.shape[0]
 
-            # 총 테스트 수 및 총 불합격(FAIL) 수
             total_test = len(day_group)
             fail_count = false_defect_count + true_defect_count
 
@@ -102,5 +84,3 @@ def analyze_data(df):
             }
     
     return summary_data, sorted(list(df['PcbStartTime'].dt.date.dropna().unique()))
-
-# --- Tkinter 코드는 이 파일에서 완전히 제거합니다. ---
