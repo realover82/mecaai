@@ -4,7 +4,10 @@ from datetime import datetime
 
 # csv2.py와 csv-b.py에서 함수들을 가져옵니다.
 from csv2 import read_csv_with_dynamic_header, analyze_data
-from csv_b import read_csv_with_dynamic_header_for_fw, analyze_b_data
+from csv_fw import read_csv_with_dynamic_header_for_fw, analyze_fw_data
+from csv_rftx import read_csv_with_dynamic_header_for_rftx, analyze_rftx_data
+from csv_semi import read_csv_with_dynamic_header_for_semi, analyze_semi_data
+from csv_func import read_csv_with_dynamic_header_for_func, analyze_func_data
 
 def display_analysis_result(df, file_name, analysis_function, date_col_name):
     """분석 결과를 Streamlit에 표시하는 함수 (분석 함수와 날짜 컬럼명을 인자로 받음)"""
@@ -44,13 +47,13 @@ def display_analysis_result(df, file_name, analysis_function, date_col_name):
             report_df = pd.DataFrame(report_data)
             st.table(report_df)
             
-            for date_iso, date_str in zip([d.strftime('%Y-%m-%d') for d in all_dates], kor_date_cols):
-                data_point = summary_data[jig].get(date_iso)
-                if data_point and data_point['false_defect_sns']:
-                    st.write(f"**({date_str}) 가성불량 시리얼 번호 목록 ({jig})**")
-                    for sn in data_point['false_defect_sns']:
-                        st.code(f"      {sn}")
-                    st.markdown("---")
+            # for date_iso, date_str in zip([d.strftime('%Y-%m-%d') for d in all_dates], kor_date_cols):
+            #     data_point = summary_data[jig].get(date_iso)
+            #     if data_point and data_point['false_defect_sns']:
+            #         st.write(f"**({date_str}) 가성불량 시리얼 번호 목록 ({jig})**")
+            #         for sn in data_point['false_defect_sns']:
+            #             st.code(f"      {sn}")
+            #         st.markdown("---")
             
         st.success("분석이 완료되었습니다!")
 
@@ -67,10 +70,10 @@ def main():
     st.title("리모컨 생산 데이터 분석 툴")
     st.markdown("---")
 
-    tab1, tab2 = st.tabs(["파일 A 분석", "파일 B 분석"])
+    tab1, tab2 = st.tabs(["파일 PCB 분석", "파일 fw 분석", "파일 rftx 분석", "파일 semi 분석", "파일 func 분석"])
 
     with tab1:
-        st.header("파일 A (csv2.py 실행)")
+        st.header("파일 PCB (csv2.py 실행)")
         uploaded_file_a = st.file_uploader("파일 A를 선택하세요", type=["csv"], key="file_a_uploader")
         if uploaded_file_a:
             df_a = read_a_data(uploaded_file_a)
@@ -79,7 +82,34 @@ def main():
                 display_analysis_result(df_a, uploaded_file_a.name, analyze_data, 'PcbStartTime')
 
     with tab2:
-        st.header("파일 B (csv-b.py 실행)")
+        st.header("파일 fw (csv_b.py 실행)")
+        uploaded_file_b = st.file_uploader("파일 B를 선택하세요", type=["csv"], key="file_b_uploader")
+        if uploaded_file_b:
+            df_b = read_b_data(uploaded_file_b)
+            st.dataframe(df_b.head())
+            if st.button("파일 B 분석 실행", key="analyze_b_button"):
+                display_analysis_result(df_b, uploaded_file_b.name, analyze_b_data, 'FwStamp')
+
+    with tab3:
+        st.header("파일 rftx (csv_rftx.py 실행)")
+        uploaded_file_b = st.file_uploader("파일 B를 선택하세요", type=["csv"], key="file_b_uploader")
+        if uploaded_file_b:
+            df_b = read_b_data(uploaded_file_b)
+            st.dataframe(df_b.head())
+            if st.button("파일 B 분석 실행", key="analyze_b_button"):
+                display_analysis_result(df_b, uploaded_file_b.name, analyze_b_data, 'FwStamp')
+
+    with tab4:
+        st.header("파일 semi (csv_semi.py 실행)")
+        uploaded_file_b = st.file_uploader("파일 B를 선택하세요", type=["csv"], key="file_b_uploader")
+        if uploaded_file_b:
+            df_b = read_b_data(uploaded_file_b)
+            st.dataframe(df_b.head())
+            if st.button("파일 B 분석 실행", key="analyze_b_button"):
+                display_analysis_result(df_b, uploaded_file_b.name, analyze_b_data, 'FwStamp')
+
+    with tab5:
+        st.header("파일 func (csv_func.py 실행)")
         uploaded_file_b = st.file_uploader("파일 B를 선택하세요", type=["csv"], key="file_b_uploader")
         if uploaded_file_b:
             df_b = read_b_data(uploaded_file_b)
