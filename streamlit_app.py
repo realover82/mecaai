@@ -53,16 +53,16 @@ def display_analysis_result(analysis_key, file_name):
         all_reports_text += report_df.to_csv(index=False) + "\n"
 
         # 가성불량 시리얼 번호 목록
-        for date_iso, date_str in zip([d.strftime('%Y-%m-%d') for d in all_dates], kor_date_cols):
-            data_point = summary_data[jig].get(date_iso)
-            if data_point and data_point['false_defect_sns']:
-                st.write(f"**({date_str}) 가성불량 시리얼 번호 목록 ({jig})**")
-                all_reports_text += f"({date_str}) 가성불량 시리얼 번호 목록 ({jig})\n"
-                for sn in data_point['false_defect_sns']:
-                    st.code(f"      {sn}")
-                    all_reports_text += f"      {sn}\n"
-                st.markdown("---")
-                all_reports_text += "\n"
+        # for date_iso, date_str in zip([d.strftime('%Y-%m-%d') for d in all_dates], kor_date_cols):
+        #     data_point = summary_data[jig].get(date_iso)
+        #     if data_point and data_point['false_defect_sns']:
+        #         st.write(f"**({date_str}) 가성불량 시리얼 번호 목록 ({jig})**")
+        #         all_reports_text += f"({date_str}) 가성불량 시리얼 번호 목록 ({jig})\n"
+        #         for sn in data_point['false_defect_sns']:
+        #             st.code(f"      {sn}")
+        #             all_reports_text += f"      {sn}\n"
+        #         st.markdown("---")
+        #         all_reports_text += "\n"
 
     st.success("분석이 완료되었습니다!")
 
