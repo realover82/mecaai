@@ -4,7 +4,7 @@ from datetime import datetime
 
 # csv2.py와 csv-b.py에서 함수들을 가져옵니다.
 from csv2 import read_csv_with_dynamic_header, analyze_data
-from csv-b import read_csv_with_dynamic_header_for_fw, analyze_b_data
+from csv_b import read_csv_with_dynamic_header_for_fw, analyze_b_data
 
 def display_analysis_result(df, file_name, analysis_function, date_col_name):
     """분석 결과를 Streamlit에 표시하는 함수 (분석 함수와 날짜 컬럼명을 인자로 받음)"""
