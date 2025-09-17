@@ -6,9 +6,25 @@ import warnings
 warnings.filterwarnings('ignore')
 
 def clean_string_format(value):
-    if isinstance(value, str) and value.startswith('="') and value.endswith('"'):
-        return value[2:-1]
-    return value
+    """다양한 형태의 문자열 포맷을 정리하는 함수"""
+    if pd.isna(value):
+        return value
+    
+    value_str = str(value).strip()
+    
+    # ="값" 형태 처리
+    if value_str.startswith('="') and value_str.endswith('"'):
+        return value_str[2:-1]
+    
+    # ""값"" 형태 처리  
+    if value_str.startswith('""') and value_str.endswith('""'):
+        return value_str[2:-2]
+    
+    # "값" 형태 처리
+    if value_str.startswith('"') and value_str.endswith('"') and len(value_str) > 2:
+        return value_str[1:-1]
+    
+    return value_str
 
 def read_csv_with_dynamic_header_for_Semi(uploaded_file):
     """SemiAssy 데이터에 맞는 키워드로 헤더를 찾아 DataFrame을 로드하는 함수"""
@@ -20,10 +36,10 @@ def read_csv_with_dynamic_header_for_Semi(uploaded_file):
             try:
                 # 파일을 임시로 읽어 헤더 행을 찾습니다.
                 file_content = io.BytesIO(uploaded_file.getvalue())
-                df_temp = pd.read_csv(file_content, header=None, nrows=100, encoding=encoding)
+                df_temp = pd.read_csv(file_content, header=None, nrows=20, encoding=encoding)
                 
-                # SemiAssy 데이터에 맞는 키워드 (더 유연하게 검색)
-                keywords = ['SNumber', 'SemiAssy', 'Semi']  # 더 유연한 키워드
+                # SemiAssy 데이터에 맞는 키워드
+                keywords = ['SNumber', 'SemiAssyStartTime', 'SemiAssyPass']
                 
                 header_row = None
                 for i, row in df_temp.iterrows():
@@ -35,8 +51,8 @@ def read_csv_with_dynamic_header_for_Semi(uploaded_file):
                         if any(keyword in str(val) for val in row_values):
                             matched_keywords += 1
                     
-                    # 최소 1개 이상의 키워드가 매칭되면 헤더로 간주 (조건 완화)
-                    if matched_keywords >= 1:
+                    # 모든 키워드가 매칭되면 헤더로 간주
+                    if matched_keywords >= len(keywords):
                         header_row = i
                         break
                 
@@ -45,17 +61,12 @@ def read_csv_with_dynamic_header_for_Semi(uploaded_file):
                     file_content.seek(0)
                     df = pd.read_csv(file_content, header=header_row, encoding=encoding)
                     
-                    # SemiAssy 관련 컬럼이 있는지 확인
-                    semi_columns = [col for col in df.columns if 'SemiAssy' in str(col) or 'Semi' in str(col)]
-                    if len(semi_columns) > 0:
-                        return df
-                else:
-                    # 헤더 행을 찾지 못하면 첫 번째 행을 헤더로 시도
-                    file_content.seek(0)
-                    df = pd.read_csv(file_content, encoding=encoding)
+                    # 데이터 정리 - 첫 번째 컬럼이 인덱스인 경우 제거
+                    if df.columns[0] == '' or pd.isna(df.columns[0]) or str(df.columns[0]).strip() == '':
+                        df = df.iloc[:, 1:]  # 첫 번째 컬럼 제거
                     
                     # SemiAssy 관련 컬럼이 있는지 확인
-                    semi_columns = [col for col in df.columns if 'SemiAssy' in str(col) or 'Semi' in str(col)]
+                    semi_columns = [col for col in df.columns if 'SemiAssy' in str(col)]
                     if len(semi_columns) > 0:
                         return df
                 
@@ -65,15 +76,7 @@ def read_csv_with_dynamic_header_for_Semi(uploaded_file):
                 print(f"Error with encoding {encoding}: {e}")
                 continue
         
-        # 모든 시도가 실패한 경우, 기본 방식으로 읽기 시도
-        file_content = io.BytesIO(uploaded_file.getvalue())
-        df = pd.read_csv(file_content)
-        
-        # 데이터가 있고 SemiAssy 관련 컬럼이 없어도 일단 반환 (통합 파일일 수 있음)
-        if len(df) > 0:
-            return df
-        else:
-            return None
+        return None
             
     except Exception as e:
         print(f"Final error reading CSV: {e}")
@@ -91,6 +94,7 @@ def analyze_Semi_data(df):
             # 빈 결과 반환
             return {}, []
         
+        # 데이터 정리
         for col in df.columns:
             df[col] = df[col].apply(clean_string_format)
         
@@ -99,21 +103,19 @@ def analyze_Semi_data(df):
         df['PassStatusNorm'] = df['SemiAssyPass'].fillna('').astype(str).str.strip().str.upper()
         
         # 유효한 날짜가 있는 행만 필터링
-        df_valid = df[df['SemiAssyStartTime'].notna()]
+        df_valid = df[df['SemiAssyStartTime'].notna()].copy()
         
         if len(df_valid) == 0:
             print("No valid datetime data found")
             return {}, []
         
         # JIG 구분자를 다른 필드로 변경하거나 기본값 사용
-        # 예를 들어, BatadcPC나 다른 적절한 필드를 사용하거나, 고정값을 사용
         if 'BatadcPC' in df_valid.columns and not df_valid['BatadcPC'].isna().all():
             jig_column = 'BatadcPC'
         elif 'SemiAssyMaxSolarVolt' in df_valid.columns and not df_valid['SemiAssyMaxSolarVolt'].isna().all():
             jig_column = 'SemiAssyMaxSolarVolt'
         else:
             # JIG 정보가 없는 경우 기본값으로 "DEFAULT_JIG" 사용
-            df_valid = df_valid.copy()  # SettingWithCopyWarning 방지
             df_valid['DEFAULT_JIG'] = 'SemiAssy_JIG'
             jig_column = 'DEFAULT_JIG'
         
