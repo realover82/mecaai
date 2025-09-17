@@ -45,7 +45,7 @@ def analyze_Semi_data(df):
     for col in df.columns:
         df[col] = df[col].apply(clean_string_format)
 
-    df['SemiAssyStartTime'] = pd.to_datetime(df['SemiAssyStartTime'], errors='coerce')
+    df['SemiAssyStartTime'] = pd.to_datetime(df['SemiAssyStartTime'], format='%Y%m%d%H%M%S', errors='coerce')
     df['PassStatusNorm'] = df['SemiAssyPass'].fillna('').astype(str).str.strip().str.upper()
 
     summary_data = {}
