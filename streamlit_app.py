@@ -62,10 +62,10 @@ def main():
                         for date_iso, date_str in zip([d.strftime('%Y-%m-%d') for d in all_dates], kor_date_cols):
                             data_point = summary_data[jig].get(date_iso)
                             if data_point and data_point['false_defect_sns']:
-                                st.write(f"**({date_str}) 가성불량 시리얼 번호 목록 ({jig})**")
-                                for sn in data_point['false_defect_sns']:
-                                    st.code(f"      {sn}")
-                                st.markdown("---")
+                                # st.write(f"**({date_str}) 가성불량 시리얼 번호 목록 ({jig})**")
+                                # for sn in data_point['false_defect_sns']:
+                                #     st.code(f"      {sn}")
+                                # st.markdown("---")
                                 
                     st.success("분석이 완료되었습니다!")
         else:
