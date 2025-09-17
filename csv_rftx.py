@@ -46,7 +46,7 @@ def read_csv_with_dynamic_header_for_rftx(uploaded_file):
         return None
 
 # B파일 분석 로직 함수 (Fw 데이터를 분석하도록 수정)
-def analyze_RfTx_data(df):
+def analyze_rftx_data(df):
     """Fw 데이터의 분석 로직을 담고 있는 함수"""
     # 데이터 전처리
     for col in df.columns:
