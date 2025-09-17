@@ -52,17 +52,17 @@ def analyze_Semi_data(df):
     for col in df.columns:
         df[col] = df[col].apply(clean_string_format)
 
-    df['SemiStamp'] = pd.to_datetime(df['SemiStamp'], errors='coerce')
+    df['SemiAssyStartTime'] = pd.to_datetime(df['SemiAssyStartTime'], errors='coerce')
     df['PassStatusNorm'] = df['SemiAssyPass'].fillna('').astype(str).str.strip().str.upper()
 
     summary_data = {}
 
     # 'PC'를 기준으로 그룹화
     for jig, group in df.groupby('SemiAssyMaxSolarVolt'):
-        if group['SemiStamp'].dt.date.dropna().empty:
+        if group['SemiAssyStartTime'].dt.date.dropna().empty:
             continue
         
-        for d, day_group in group.groupby(group['SemiStamp'].dt.date):
+        for d, day_group in group.groupby(group['SemiAssyStartTime'].dt.date):
             if pd.isna(d):
                 continue
             
