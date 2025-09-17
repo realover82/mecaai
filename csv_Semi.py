@@ -94,5 +94,5 @@ def analyze_Semi_data(df):
                 'false_defect_sns': false_defect_sns
             }
     
-    all_dates = sorted(list(df['SemiStamp'].dt.date.dropna().unique()))
+    all_dates = sorted(list(df['SemiAssyStartTime'].dt.date.dropna().unique()))
     return summary_data, all_dates
