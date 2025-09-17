@@ -120,17 +120,52 @@ def main():
         st.header("파일 Semi (SemiAssy_Process)")
         uploaded_file = st.file_uploader("파일 Semi를 선택하세요", type=["csv"], key="uploader_semi")
         if uploaded_file:
+            # 파일 정보 표시
+            st.info(f"업로드된 파일: {uploaded_file.name} (크기: {uploaded_file.size} bytes)")
+            
             df = read_semi_data(uploaded_file)
             if df is not None:
+                st.success("파일 로드 성공!")
                 st.dataframe(df.head())
+                
                 # 디버깅을 위한 정보 표시
+                st.info(f"총 행 수: {len(df)}")
+                st.info(f"총 컬럼 수: {len(df.columns)}")
                 st.info(f"로드된 데이터 컬럼: {list(df.columns)}")
-                semi_cols = [col for col in df.columns if 'SemiAssy' in str(col)]
-                st.info(f"SemiAssy 관련 컬럼: {semi_cols}")
+                
+                # SemiAssy 관련 컬럼 찾기
+                semi_cols = [col for col in df.columns if 'SemiAssy' in str(col) or 'Semi' in str(col)]
+                if semi_cols:
+                    st.success(f"SemiAssy 관련 컬럼 발견: {semi_cols}")
+                else:
+                    st.warning("SemiAssy 관련 컬럼을 찾을 수 없습니다. 통합 파일일 수 있습니다.")
+                
+                # 필수 컬럼 체크
+                required_cols = ['SNumber', 'SemiAssyStartTime', 'SemiAssyPass']
+                missing_cols = [col for col in required_cols if col not in df.columns]
+                if missing_cols:
+                    st.error(f"필수 컬럼이 없습니다: {missing_cols}")
+                else:
+                    st.success("필수 컬럼이 모두 있습니다!")
+                
                 if st.button("파일 Semi 분석 실행", key="analyze_semi"):
                     display_analysis_result(df, uploaded_file.name, analyze_Semi_data, 'SemiAssyStartTime')
             else:
-                st.error("Semi 데이터 파일을 읽을 수 없습니다. 파일 형식을 확인해주세요.")
+                st.error("Semi 데이터 파일을 읽을 수 없습니다.")
+                st.info("다음을 확인해주세요:")
+                st.info("1. 파일이 CSV 형식인지 확인")
+                st.info("2. 파일 인코딩이 UTF-8, CP949, EUC-KR 중 하나인지 확인")
+                st.info("3. 파일에 SemiAssy 관련 컬럼이 있는지 확인")
+                
+                # 파일의 첫 몇 줄을 원본 그대로 표시해보기
+                try:
+                    file_content = uploaded_file.getvalue().decode('utf-8-sig', errors='ignore')
+                    lines = file_content.split('\n')[:10]
+                    st.text("파일의 첫 10줄:")
+                    for i, line in enumerate(lines):
+                        st.text(f"{i+1}: {line}")
+                except:
+                    st.error("파일 내용을 미리보기할 수 없습니다.")
 
     with tab5:
         st.header("파일 Func (Func_Process)")
