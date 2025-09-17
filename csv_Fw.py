@@ -1,5 +1,5 @@
 #
-# csv_fw.py
+# csv_Fw.py
 # 이 파일은 Streamlit 앱에서 모듈로 사용됩니다.
 # 따라서, 콘솔 출력 관련 코드(print, sys, io 등)는 모두 제거했습니다.
 
@@ -19,7 +19,7 @@ def clean_string_format(value):
 
 # read_csv_with_dynamic_header 함수는 Streamlit 앱에서 이미 정의되어 있으므로 필요 없습니다.
 # 하지만 파일 로드 키워드만 Fw 데이터에 맞게 변경하여 함수를 하나로 통합합니다.
-def read_csv_with_dynamic_header_for_fw(uploaded_file):
+def read_csv_with_dynamic_header_for_Fw(uploaded_file):
     """Fw 데이터에 맞는 키워드로 헤더를 찾아 DataFrame을 로드하는 함수"""
     try:
         file_content = io.BytesIO(uploaded_file.getvalue())
@@ -46,7 +46,7 @@ def read_csv_with_dynamic_header_for_fw(uploaded_file):
         return None
 
 # B파일 분석 로직 함수 (Fw 데이터를 분석하도록 수정)
-def analyze_fw_data(df):
+def analyze_Fw_data(df):
     """Fw 데이터의 분석 로직을 담고 있는 함수"""
     # 데이터 전처리
     for col in df.columns:
