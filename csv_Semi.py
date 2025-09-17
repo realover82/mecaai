@@ -1,8 +1,3 @@
-#
-# csv_Semi.py
-# 이 파일은 Streamlit 앱에서 모듈로 사용됩니다.
-# 따라서, 콘솔 출력 관련 코드(print, sys, io 등)는 모두 제거했습니다.
-
 import pandas as pd
 import numpy as np
 import io
@@ -11,7 +6,6 @@ import warnings
 
 warnings.filterwarnings('ignore')
 
-# '="...' 형식의 문자열을 정리하는 함수
 def clean_string_format(value):
     if isinstance(value, str) and value.startswith('="') and value.endswith('"'):
         return value[2:-1]
@@ -20,11 +14,11 @@ def clean_string_format(value):
 def read_csv_with_dynamic_header_for_Semi(uploaded_file):
     """SemiAssy 데이터에 맞는 키워드로 헤더를 찾아 DataFrame을 로드하는 함수"""
     try:
+        # 파일을 임시로 읽어 헤더 행을 찾습니다.
         file_content = io.BytesIO(uploaded_file.getvalue())
         df_temp = pd.read_csv(file_content, header=None, nrows=100)
         
-        # 'SemiAssy' 관련 필드명으로 키워드 수정
-        # 'SemiStamp' 대신 'SemiAssyStartTime'을 사용하도록 수정
+        # SemiAssy 데이터에 맞는 키워드
         keywords = ['SNumber', 'SemiAssyStartTime', 'SemiAssyMaxSolarVolt', 'SemiAssyPass']
         
         header_row = None
@@ -36,27 +30,26 @@ def read_csv_with_dynamic_header_for_Semi(uploaded_file):
                 break
         
         if header_row is not None:
+            # 헤더 행을 찾으면, 해당 행부터 파일을 다시 읽습니다.
             file_content.seek(0)
             df = pd.read_csv(file_content, header=header_row)
             return df
         else:
+            # 헤더 행을 찾지 못하면 None 반환
             return None
     except Exception as e:
         return None
 
 def analyze_Semi_data(df):
     """SemiAssy 데이터의 분석 로직을 담고 있는 함수"""
-    # 데이터 전처리
     for col in df.columns:
         df[col] = df[col].apply(clean_string_format)
 
-    # SemiAssyStartTime 열을 datetime 형식으로 변환
     df['SemiAssyStartTime'] = pd.to_datetime(df['SemiAssyStartTime'], errors='coerce')
     df['PassStatusNorm'] = df['SemiAssyPass'].fillna('').astype(str).str.strip().str.upper()
 
     summary_data = {}
 
-    # 'SemiAssyMaxSolarVolt'를 기준으로 그룹화
     for jig, group in df.groupby('SemiAssyMaxSolarVolt'):
         if group['SemiAssyStartTime'].dt.date.dropna().empty:
             continue
