@@ -15,28 +15,44 @@ def read_csv_with_dynamic_header_for_Semi(uploaded_file):
     try:
         # 파일을 임시로 읽어 헤더 행을 찾습니다.
         file_content = io.BytesIO(uploaded_file.getvalue())
-        df_temp = pd.read_csv(file_content, header=None, nrows=100)
+        df_temp = pd.read_csv(file_content, header=None, nrows=100, encoding='utf-8-sig')
         
-        # SemiAssy 데이터에 맞는 키워드
+        # SemiAssy 데이터에 맞는 키워드 (더 유연하게 검색)
         keywords = ['SNumber', 'SemiAssyStartTime', 'SemiAssyPass']
         
         header_row = None
         for i, row in df_temp.iterrows():
-            row_values = [str(x).strip() for x in row.values if pd.notna(x)]
+            row_values = [str(x).strip() for x in row.values if pd.notna(x) and str(x) != 'nan']
             
-            if all(keyword in row_values for keyword in keywords):
+            # 키워드를 하나씩 확인하여 매칭되는 개수 세기
+            matched_keywords = 0
+            for keyword in keywords:
+                if any(keyword in str(val) for val in row_values):
+                    matched_keywords += 1
+            
+            # 최소 2개 이상의 키워드가 매칭되면 헤더로 간주
+            if matched_keywords >= 2:
                 header_row = i
                 break
         
         if header_row is not None:
             # 헤더 행을 찾으면, 해당 행부터 파일을 다시 읽습니다.
             file_content.seek(0)
-            df = pd.read_csv(file_content, header=header_row)
+            df = pd.read_csv(file_content, header=header_row, encoding='utf-8-sig')
             return df
         else:
-            # 헤더 행을 찾지 못하면 None 반환
-            return None
+            # 헤더 행을 찾지 못하면 첫 번째 행을 헤더로 시도
+            file_content.seek(0)
+            df = pd.read_csv(file_content, encoding='utf-8-sig')
+            
+            # SemiAssy 관련 컬럼이 있는지 확인
+            semi_columns = [col for col in df.columns if 'SemiAssy' in str(col)]
+            if len(semi_columns) > 0:
+                return df
+            else:
+                return None
     except Exception as e:
+        print(f"Error reading CSV: {e}")
         return None
 
 def analyze_Semi_data(df):
