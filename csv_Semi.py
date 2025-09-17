@@ -26,7 +26,7 @@ def read_csv_with_dynamic_header_for_Semi(uploaded_file):
         df_temp = pd.read_csv(file_content, header=None, nrows=100)
         
         # 'Fw' 관련 필드명으로 키워드 수정
-        keywords = ['SNumber', 'SemiStamp', 'AssyMaxSolarVolt', 'SemiAssyPass']
+        keywords = ['SNumber', 'SemiStamp', 'SemiAssyMaxSolarVolt', 'SemiAssyPass']
         
         header_row = None
         for i, row in df_temp.iterrows():
@@ -58,7 +58,7 @@ def analyze_Semi_data(df):
     summary_data = {}
 
     # 'PC'를 기준으로 그룹화
-    for jig, group in df.groupby('AssyMaxSolarVolt'):
+    for jig, group in df.groupby('SemiAssyMaxSolarVolt'):
         if group['SemiStamp'].dt.date.dropna().empty:
             continue
         
