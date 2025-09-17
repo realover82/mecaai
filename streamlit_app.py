@@ -7,7 +7,7 @@ from csv2 import read_csv_with_dynamic_header, analyze_data
 from csv_fw import read_csv_with_dynamic_header_for_fw, analyze_fw_data
 from csv_rftx import read_csv_with_dynamic_header_for_rftx, analyze_rftx_data
 from csv_semi import read_csv_with_dynamic_header_for_semi, analyze_semi_data
-from csv_func import read_csv_with_dynamic_header_for_func, analyze_func_data
+from csv_batadc import read_csv_with_dynamic_header_for_batadc, analyze_batadc_data
 
 def display_analysis_result(df, file_name, analysis_function, date_col_name):
     """분석 결과를 Streamlit에 표시하는 함수 (분석 함수와 날짜 컬럼명을 인자로 받음)"""
