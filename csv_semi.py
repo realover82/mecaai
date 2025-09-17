@@ -1,12 +1,12 @@
 #
-# csv_rftx.py
+# csv_Semi.py
 # 이 파일은 Streamlit 앱에서 모듈로 사용됩니다.
 # 따라서, 콘솔 출력 관련 코드(print, sys, io 등)는 모두 제거했습니다.
 
 import pandas as pd
 import numpy as np
 import io
-from datetime import datetimerftx
+from datetime import datetime
 import warnings
 
 warnings.filterwarnings('ignore')
@@ -19,14 +19,14 @@ def clean_string_format(value):
 
 # read_csv_with_dynamic_header 함수는 Streamlit 앱에서 이미 정의되어 있으므로 필요 없습니다.
 # 하지만 파일 로드 키워드만 Fw 데이터에 맞게 변경하여 함수를 하나로 통합합니다.
-def read_csv_with_dynamic_header_for_rftx(uploaded_file):
+def read_csv_with_dynamic_header_for_Semi(uploaded_file):
     """Fw 데이터에 맞는 키워드로 헤더를 찾아 DataFrame을 로드하는 함수"""
     try:
         file_content = io.BytesIO(uploaded_file.getvalue())
         df_temp = pd.read_csv(file_content, header=None, nrows=100)
         
         # 'Fw' 관련 필드명으로 키워드 수정
-        keywords = ['SNumber', 'RfTxStamp', 'RfTxPC', 'RfTxPass']
+        keywords = ['SNumber', 'SemiStamp', 'AssyMaxSolarVolt', 'SemiAssyPass']
         
         header_row = None
         for i, row in df_temp.iterrows():
@@ -46,23 +46,23 @@ def read_csv_with_dynamic_header_for_rftx(uploaded_file):
         return None
 
 # B파일 분석 로직 함수 (Fw 데이터를 분석하도록 수정)
-def analyze_rftx_data(df):
+def analyze_Semi_data(df):
     """Fw 데이터의 분석 로직을 담고 있는 함수"""
     # 데이터 전처리
     for col in df.columns:
         df[col] = df[col].apply(clean_string_format)
 
-    df['RfTxStamp'] = pd.to_datetime(df['RfTxStamp'], errors='coerce')
-    df['PassStatusNorm'] = df['RfTxPass'].fillna('').astype(str).str.strip().str.upper()
+    df['SemiStamp'] = pd.to_datetime(df['SemiStamp'], errors='coerce')
+    df['PassStatusNorm'] = df['SemiAssyPass'].fillna('').astype(str).str.strip().str.upper()
 
     summary_data = {}
 
-    # 'FwPC'를 기준으로 그룹화
-    for jig, group in df.groupby('RfTxPC'):
-        if group['RfTxStamp'].dt.date.dropna().empty:
+    # 'PC'를 기준으로 그룹화
+    for jig, group in df.groupby('AssyMaxSolarVolt'):
+        if group['SemiStamp'].dt.date.dropna().empty:
             continue
         
-        for d, day_group in group.groupby(group['RfTxStamp'].dt.date):
+        for d, day_group in group.groupby(group['SemiStamp'].dt.date):
             if pd.isna(d):
                 continue
             
@@ -94,5 +94,5 @@ def analyze_rftx_data(df):
                 'false_defect_sns': false_defect_sns
             }
     
-    all_dates = sorted(list(df['RfTxStamp'].dt.date.dropna().unique()))
+    all_dates = sorted(list(df['SemiStamp'].dt.date.dropna().unique()))
     return summary_data, all_dates
