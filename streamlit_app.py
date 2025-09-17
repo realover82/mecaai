@@ -70,7 +70,7 @@ def main():
     st.title("리모컨 생산 데이터 분석 툴")
     st.markdown("---")
 
-    tab1, tab2 = st.tabs(["파일 PCB 분석", "파일 fw 분석", "파일 rftx 분석", "파일 semi 분석", "파일 func 분석"])
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["파일 PCB 분석", "파일 fw 분석", "파일 rftx 분석", "파일 semi 분석", "파일 func 분석"])
 
     with tab1:
         st.header("파일 PCB (csv2.py 실행)")
