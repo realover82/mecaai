@@ -65,7 +65,7 @@ def main():
                                 # st.write(f"**({date_str}) 가성불량 시리얼 번호 목록 ({jig})**")
                                 # for sn in data_point['false_defect_sns']:
                                 #     st.code(f"      {sn}")
-                                # st.markdown("---")
+                                st.markdown("---")
                                 
                     st.success("분석이 완료되었습니다!")
         else:
