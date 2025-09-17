@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 
-# csv2.py에서 함수들을 가져옵니다.
 from csv2 import read_csv_with_dynamic_header, analyze_data
 
 def main():
@@ -15,8 +14,11 @@ def main():
     if uploaded_file is not None:
         st.success(f"파일이 성공적으로 업로드되었습니다: {uploaded_file.name}")
         
-        # csv2.py의 함수를 사용하여 DataFrame 로드
-        df = read_csv_with_dynamic_header(uploaded_file)
+        @st.cache_data
+        def cached_read_csv():
+            return read_csv_with_dynamic_header(uploaded_file)
+        
+        df = cached_read_csv()
         
         if df is not None:
             st.markdown("### 데이터 미리보기")
@@ -27,7 +29,6 @@ def main():
                 st.markdown("### 분석 리포트")
                 
                 with st.spinner("데이터 분석 중... 잠시만 기다려주세요."):
-                    # csv2.py의 함수를 사용하여 데이터 분석
                     summary_data, all_dates = analyze_data(df)
                     
                     kor_date_cols = [f"{d.strftime('%y%m%d')}" for d in all_dates]
